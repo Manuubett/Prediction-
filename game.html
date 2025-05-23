@@ -98,7 +98,7 @@
 </head>
 <body>
 
-  <button onclick="window.location.href='index.html'">View Public Predictions</button>
+  <button onclick="window.location.href='public.html'">View Public Predictions</button>
   <h2>Match Setup (Admin)</h2><div style="margin-top: 30px;">
 </div>
 
@@ -134,7 +134,8 @@
   <!-- Firebase + Firestore Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy,updateDoc} from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+    
 
     const firebaseConfig = {
       apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
@@ -239,14 +240,19 @@
       list.innerHTML = "";
       querySnapshot.forEach(docSnap => {
         const data = docSnap.data();
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <strong>${data.home} vs ${data.away}</strong><br>
-          Time: <span style="color:blue">${data.time}</span><br>
-          Prediction: <span style="color:green">${data.prediction}</span><br>
-          <button onclick="deletePrediction('${docSnap.id}')">Delete</button>
-          <hr>
-        `;
+        const div = document.createElement("div");div.innerHTML = `
+  <strong>${data.home} vs ${data.away}</strong><br>
+  Time: <span style="color:blue">${data.time}</span><br>
+  Prediction: <span style="color:green">${data.prediction}</span><br>
+  <span>Result: ${
+    data.result === "correct" ? "✔️" : data.result === "wrong" ? "✖️" : "Pending"
+  }</span><br>
+  <button onclick="markResult('${docSnap.id}', 'correct')">✔️</button>
+  <button onclick="markResult('${docSnap.id}', 'wrong')">✖️</button>
+  <button onclick="deletePrediction('${docSnap.id}')">Delete</button>
+  <hr>
+`;
+        
         list.appendChild(div);
       });
     };
@@ -264,7 +270,14 @@
     document.getElementById('prediction').addEventListener('input', updateMatchDisplay);
 
     window.addEventListener("DOMContentLoaded", loadPredictions);
+    window.markResult = async function (id, result) {
+  await updateDoc(doc(db, "predictions", id), {
+    result: result
+  });
+  alert("Result updated!");
+  loadPredictions();
+}
   </script>
 
 </body>
-</html>
+  </html>
