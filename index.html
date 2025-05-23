@@ -89,11 +89,23 @@
 
 <!-- Modal -->
 <div id="modalOverlay">
-  <div id="verificationModal">
-    <h3>Access Predictions</h3>
-    <p>Pay to <b>4585402 - Bett</b> and paste the confirmation message:</p>
-    <textarea id="mpesaMessage" placeholder="e.g. Confirmed. Ksh50.00 paid to........."></textarea>
-    <button onclick="verifyMpesaMessage()">Verify Message</button>
+<div id="verificationModal">
+  <h3>Access Predictions</h3>
+  <p>Pay to <b>4585402 - Bett</b> and paste the confirmation message:</p>
+
+  <label for="durationSelect">Choose access duration:</label>
+  <select id="durationSelect">
+    <option value="50">Ksh 50 - 1 Hour</option>
+    <option value="80">Ksh 80 - 2 Hours</option>
+    <option value="110">Ksh 110 - 6 Hours</option>
+    <option value="160">Ksh 160 - 12 Hours</option>
+    <option value="240">Ksh 240 - 24 Hours</option>
+  </select>
+
+  <textarea id="mpesaMessage" placeholder="e.g. Confirmed. Ksh50.00 paid to 4585402 - Bett"></textarea>
+
+  <button onclick="verifyPayment()">Verify & Access</button>
+</div>
     
     <p style="font-size: 14px; margin-top: 10px;">Access Options: 50 (2h), 80 (4h), 110 (6h), 160 (12h), 210 (24h)</p>
   </div>
