@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Football Predictions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 30px;
+      margin: 0;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .prediction-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-left: 6px solid #007BFF;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .prediction-card .teams {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .prediction-card .time {
+      color: #007BFF;
+      font-weight: bold;
+    }
+    .prediction-card .prediction {
+      color: green;
+      font-weight: bold;
+    }
+
+    /* Modal Styles */
+    #modalOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+
+    #verificationModal {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div id="smartLinkBox" style="width:40px;height:20px; position:absolute; top:20px; right:0; padding:20px; background:#f8f9fa; border-left:5px solid #007BFF; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); font-family:Arial,sans-serif; text-align:center;">
+  <a href="index.html" style="color:#007BFF; text-decoration:none; font-weight:bold; display:block; font-size:40px;">
+    🔐
+  </a>
+</div>
+
+<!-- Modal -->
+<div id="modalOverlay">
+  <div id="verificationModal">
+    <h3>Access Predictions</h3>
+    <p>Pay to <b>4585402 - Bett</b> and paste the confirmation message:</p>
+    <textarea id="mpesaMessage" placeholder="e.g. Confirmed. Ksh50.00 paid to Emanuel Kipkirui Bett..."></textarea>
+    <button onclick="verifyMpesaMessage()">Verify Message</button>
+    
+    <p style="font-size: 14px; margin-top: 10px;">Access Options: 50 (2h), 80 (4h), 110 (6h), 160 (12h), 210 (24h)</p>
+  </div>
+</div>
+<h2>PREDICTIONS</h2>
+<div id="predictions" style="width: 100%; padding: 20px; text-align: center; font-size: 24px; font-weight: bold;">
+  Upcoming Predictions
+</div>
+
+<style>
+  @keyframes zoomColorCycle {
+    0% {
+      
+      color: red;
+    }
+    25% {
+      
+      color: blue;
+    }
+    50% {
+      
+      color: green;
+    }
+    75% {
+    
+      color: orange;
+    }
+    100% {
+      
+      color: red;
+    }
+  }
+
+  #predictions {
+    animation: zoomColorCycle 3s infinite ease-in-out;
+  }
+</style>
+
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
+    authDomain: "prediction-94bf9.firebaseapp.com",
+    projectId: "prediction-94bf9",
+    storageBucket: "prediction-94bf9.firebasestorage.app",
+    messagingSenderId: "960123689722",
+    appId: "1:960123689722:web:c707337a7b6972a3478743",
+    measurementId: "G-X0RFG0VWK5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function loadPredictions() {
+    const container = document.getElementById("predictions");
+    container.innerHTML = "Loading...";
+
+    const q = query(collection(db, "predictions"), orderBy("timestamp", "desc"));
+    const querySnapshot = await getDocs(q);
+
+    container.innerHTML = "";
+    querySnapshot.forEach(doc => {
+      const p = doc.data();
+      const card = document.createElement("div");
+      card.className = "prediction-card";
+      card.innerHTML = `
+        <div class="teams">${p.home} vs ${p.away}</div>
+        <div class="time">Time: ${p.time}</div>
+        <div class="prediction">Prediction: ${p.prediction}</div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  const validCode = "Emanuel Kipkirui Bett";
+  const allowedAmounts = {
+    "50": 2 * 60 * 60 * 1000,
+    "80": 4 * 60 * 60 * 1000,
+    "110": 6 * 60 * 60 * 1000,
+    "160": 12 * 60 * 60 * 1000,
+    "210": 24 * 60 * 60 * 1000,
+  };
+  const usedMessages = JSON.parse(localStorage.getItem("usedMessages") || "[]");
+
+  window.verifyMpesaMessage = () => {
+    const messageInput = document.getElementById("mpesaMessage");
+    const message = messageInput.value.trim();
+
+    if (usedMessages.includes(message) || !message.includes(validCode)) {
+      return;
+    }
+
+    let duration = 0;
+    for (const [amount, time] of Object.entries(allowedAmounts)) {
+      if (message.includes(`Ksh${amount}`) || message.includes(amount)) {
+        duration = time;
+        break;
+      }
+    }
+
+    if (duration > 0) {
+      const now = Date.now();
+      localStorage.setItem("verifiedAccess", now + duration);
+      usedMessages.push(message);
+      localStorage.setItem("usedMessages", JSON.stringify(usedMessages));
+
+      messageInput.value = "********";
+      messageInput.setAttribute("readonly", true);
+      messageInput.style.pointerEvents = "none";
+      document.getElementById("modalOverlay").style.display = "none";
+      loadPredictions();
+    }
+  };
+
+  function checkVerification() {
+    const expiry = parseInt(localStorage.getItem("verifiedAccess") || "0");
+    if (expiry > Date.now()) {
+      document.getElementById("modalOverlay").style.display = "none";
+      loadPredictions();
+    } else {
+      document.getElementById("modalOverlay").style.display = "flex";
+      localStorage.removeItem("verifiedAccess");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    checkVerification();
+
+    const input = document.getElementById("mpesaMessage");
+    if (!input) return;
+
+    input.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData("text").trim();
+      input.value = pasted;
+
+      if (pasted.length >= 20) {
+        verifyMpesaMessage();
+
+        setTimeout(() => {
+          input.setAttribute("readonly", true);
+          input.style.pointerEvents = "none";
+        }, 200);
+      }
+    });
+
+    // Fully block manual interaction
+    input.addEventListener("keydown", e => e.preventDefault());
+    input.addEventListener("cut", e => e.preventDefault());
+    input.addEventListener("copy", e => e.preventDefault());
+    input.addEventListener("contextmenu", e => e.preventDefault());
+  });
+</script>
+</body>
+</html>

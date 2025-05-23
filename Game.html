@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Match Setup Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f4f4f4;
+    }
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="time"] {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    ul.suggestions {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ccc;
+      width: 300px;
+      list-style: none;
+      margin-top: 0;
+      padding-left: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    ul.suggestions li {
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+    ul.suggestions li:hover {
+      background-color: #eee;
+    }
+    .match-display {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 18px;
+      width: fit-content;
+    }
+    .match-display span {
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #savedList {
+      margin-top: 30px;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: fit-content;
+    }
+    #savedList div {
+      margin-bottom: 15px;
+    }
+    
+  button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #218838;
+  }
+
+  </style>
+</head>
+<body>
+
+  <button onclick="window.location.href='public.html'">View Public Predictions</button>
+  <h2>Match Setup (Admin)</h2><div style="margin-top: 30px;">
+</div>
+
+  <div class="form-group">
+    <label for="homeTeam">Home Team</label>
+    <input type="text" id="homeTeam" placeholder="Start typing..." autocomplete="off" />
+    <ul id="homeSuggestions" class="suggestions"></ul>
+  </div>
+
+  <div class="form-group">
+    <label for="awayTeam">Away Team</label>
+    <input type="text" id="awayTeam" placeholder="Start typing..." autocomplete="off" />
+    <ul id="awaySuggestions" class="suggestions"></ul>
+  </div>
+
+  <div class="form-group">
+    <label for="matchTime">Match Time</label>
+    <input type="time" id="matchTime" />
+  </div>
+
+  <div class="form-group">
+    <label for="prediction">Prediction</label>
+    <input type="text" id="prediction" placeholder="e.g. 2-1, Draw, Over 2.5, GG" />
+  </div>
+
+  <div id="display" class="match-display"></div>
+
+  <button onclick="savePrediction()">Save Prediction</button>
+
+  <h3>Saved Predictions</h3>
+  <div id="savedList">Loading...</div>
+
+  <!-- Firebase + Firestore Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
+      authDomain: "prediction-94bf9.firebaseapp.com",
+      projectId: "prediction-94bf9",
+      storageBucket: "prediction-94bf9.firebasestorage.app",
+      messagingSenderId: "960123689722",
+      appId: "1:960123689722:web:c707337a7b6972a3478743",
+      measurementId: "G-X0RFG0VWK5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const teams = [
+      "Torino", "Inter Milan", "Napoli", "Fiorentina", "Atalanta", "Sampdoria", "Lazio", "Roma",
+      "Frosinone", "Sassuolo", "Bologna", "Verona", "Lecce", "AC Milan", "Udinese", "SPAL", "Genoa",
+      "Juventus", "Brescia", "Cagliari", "Zoo Kericho", "KCB", "Mathare", "Posta", "Ulinzi Stars",
+      "Kariobangi", "Gor Mahia", "Chemelil", "Western Stima", "Kakamega", "Nzoia", "Sofapaka",
+      "Sony Sugar", "Port", "Wazito", "Tusker", "Leopards", "Vihiga", "Athletic Bilbao", "Barcelona",
+      "Real Madrid", "Levante", "Sevilla", "Leganes", "Valencia", "Valladolid", "Villarreal", "Betis",
+      "Celta Vigo", "Espanyol", "Alaves", "Getafe", "Mallorca", "Real Sociedad", "Atletico Madrid",
+      "Osasuna", "Granada", "Almeria", "West Brom", "West Ham", "Fulham", "Burnley", "Leeds",
+      "London Blues", "Brighton", "Liverpool", "Aston Villa", "Sheffield United", "London Reds",
+      "Wolves", "Southampton", "Manchester Reds", "Leicester", "Manchester Blue", "Everton",
+      "Newcastle", "Tottenham", "Crystal Palace"
+    ];
+
+    function setupAutocomplete(inputId, suggestionId) {
+      const input = document.getElementById(inputId);
+      const suggestions = document.getElementById(suggestionId);
+
+      input.addEventListener('input', () => {
+        const query = input.value.trim().toLowerCase();
+        suggestions.innerHTML = '';
+
+        if (query.length >= 3) {
+          const matches = teams.filter(team => team.toLowerCase().startsWith(query));
+          matches.forEach(team => {
+            const li = document.createElement('li');
+            li.textContent = team;
+            li.addEventListener('click', () => {
+              input.value = team;
+              suggestions.innerHTML = '';
+              updateMatchDisplay();
+            });
+            suggestions.appendChild(li);
+          });
+        }
+        updateMatchDisplay();
+      });
+
+      input.addEventListener('blur', () => {
+        setTimeout(() => suggestions.innerHTML = '', 100);
+      });
+    }
+
+    function updateMatchDisplay() {
+      const home = document.getElementById('homeTeam').value.trim();
+      const away = document.getElementById('awayTeam').value.trim();
+      const time = document.getElementById('matchTime').value;
+      const prediction = document.getElementById('prediction').value.trim();
+      const display = document.getElementById('display');
+
+      if (home && away) {
+        display.innerHTML = `<span>${home}</span> vs <span>${away}</span>`;
+        if (time) display.innerHTML += `<br>Time: ${time}`;
+        if (prediction) display.innerHTML += `<br>Prediction: ${prediction}`;
+      } else {
+        display.innerHTML = '';
+      }
+    }
+
+    window.savePrediction = async function () {
+      const home = document.getElementById('homeTeam').value.trim();
+      const away = document.getElementById('awayTeam').value.trim();
+      const time = document.getElementById('matchTime').value;
+      const prediction = document.getElementById('prediction').value.trim();
+
+      if (home && away && time && prediction) {
+        await addDoc(collection(db, "predictions"), {
+          home,
+          away,
+          time,
+          prediction,
+          timestamp: Date.now()
+        });
+        alert("Prediction saved!");
+        loadPredictions();
+      } else {
+        alert("Please fill in all fields.");
+      }
+    };
+
+    window.loadPredictions = async function () {
+      const list = document.getElementById("savedList");
+      list.innerHTML = "Loading...";
+
+      const q = query(collection(db, "predictions"), orderBy("timestamp", "desc"));
+      const querySnapshot = await getDocs(q);
+
+      list.innerHTML = "";
+      querySnapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <strong>${data.home} vs ${data.away}</strong><br>
+          Time: <span style="color:blue">${data.time}</span><br>
+          Prediction: <span style="color:green">${data.prediction}</span><br>
+          <button onclick="deletePrediction('${docSnap.id}')">Delete</button>
+          <hr>
+        `;
+        list.appendChild(div);
+      });
+    };
+
+    window.deletePrediction = async function (id) {
+      await deleteDoc(doc(db, "predictions", id));
+      alert("Deleted!");
+      loadPredictions();
+    };
+
+    setupAutocomplete('homeTeam', 'homeSuggestions');
+    setupAutocomplete('awayTeam', 'awaySuggestions');
+
+    document.getElementById('matchTime').addEventListener('input', updateMatchDisplay);
+    document.getElementById('prediction').addEventListener('input', updateMatchDisplay);
+
+    window.addEventListener("DOMContentLoaded", loadPredictions);
+  </script>
+
+</body>
+</html>
