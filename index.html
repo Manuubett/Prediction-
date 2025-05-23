@@ -173,11 +173,15 @@
       const card = document.createElement("div");
       card.className = "prediction-card";
       card.innerHTML = `
-        <div class="teams">${p.home} vs ${p.away}</div>
-        <div class="time">Time: ${p.time}</div>
-        <div class="prediction">Prediction: ${p.prediction}</div>
-        
-      `;
+  <div class="teams">${p.home} vs ${p.away}</div>
+  <div class="time">Time: ${p.time}</div>
+  <div class="prediction">Prediction: ${p.prediction}</div>
+  <div class="result">
+    Result: ${
+      p.result === "correct" ? "✔️" : p.result === "wrong" ? "✖️" : "Pending"
+    }
+  </div>
+`;
       container.appendChild(card);
     });
   }
@@ -262,4 +266,4 @@
   });
 </script>
 </body>
-</html>
+  </html>
