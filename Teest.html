@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Subscribe with M-PESA</title>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f8f9fa;
+    }
+    .subscription-card {
+      max-width: 600px;
+      margin: auto;
+    }
+    .highlight {
+      color: #198754;
+      font-weight: bold;
+    }
+    .footer-note {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-5">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold">Subscribe with M-PESA</h2>
+    <p class="text-muted">Unlock prediction access by completing a payment</p>
+  </div>
+
+  <!-- Subscription Info -->
+  <div class="card border-success mb-4 subscription-card">
+    <div class="card-header bg-success text-white fw-semibold">Payment Plans</div>
+    <div class="card-body">
+      <ul class="list-group list-group-flush mb-3">
+        <li class="list-group-item">Ksh 10 – Testing (1 minute)</li>
+        <li class="list-group-item">Ksh 50 – Prediction for 30 minutes</li>
+        <li class="list-group-item">Ksh 70 – Prediction for 45 minutes</li>
+        <li class="list-group-item">Ksh 100 – Prediction for 1 hour</li>
+        <li class="list-group-item">Ksh 150 – Prediction for 1½ hours</li>
+      </ul>
+      <p class="mb-0">Lipa na M-PESA &rarr; <strong>Buy Goods and Services</strong><br>
+        Use Till Number: <span class="highlight">4585402</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Submission Form -->
+  <div class="card shadow-sm subscription-card mb-4">
+    <div class="card-header bg-primary text-white fw-semibold">Submit Payment Message</div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="Enter your email" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">M-PESA Payment Message</label>
+        <textarea id="message" class="form-control" rows="4" placeholder="Paste your M-PESA message here" required></textarea>
+      </div>
+      <button onclick="submitMessage()" class="btn btn-primary w-100">Submit Payment</button>
+      <div id="submitStatus" class="mt-3 text-success text-center"></div>
+    </div>
+  </div>
+
+  <!-- Access Checker -->
+  <div class="text-center subscription-card">
+    <button onclick="checkStatus()" class="btn btn-outline-info mb-3 w-100">Check My Access</button>
+    <button id="goMainBtn" class="btn btn-success w-100" disabled>Go to Main Page</button>
+    <div id="accessStatus" class="mt-2"></div>
+  </div>
+
+  <p class="text-center mt-4 footer-note">Thank you for your support – enjoy your prediction access!</p>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
+    authDomain: "prediction-94bf9.firebaseapp.com",
+    projectId: "prediction-94bf9",
+    storageBucket: "prediction-94bf9.appspot.com",
+    messagingSenderId: "960123689722",
+    appId: "1:960123689722:web:c707337a7b6972a3478743"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  function submitMessage() {
+    const email = document.getElementById("email").value.trim();
+    const message = document.getElementById("message").value.trim();
+
+    if (!email || !message) {
+      alert("Please fill out both fields.");
+      return;
+    }
+
+    db.collection("verifications").add({
+      email: email,
+      message: message,
+      verified: false,
+      submittedAt: Date.now()
+    }).then(() => {
+      document.getElementById("submitStatus").textContent = "Message submitted. Please wait for admin approval.";
+      document.getElementById("email").value = "";
+      document.getElementById("message").value = "";
+    }).catch(error => {
+      console.error("Error submitting message: ", error);
+      alert("Something went wrong. Try again.");
+    });
+  }
+
+  function checkStatus() {
+    const email = prompt("Enter your email to check status:").trim();
+    if (!email) return;
+
+    db.collection("verifications")
+      .where("email", "==", email)
+      .orderBy("submittedAt", "desc")
+      .limit(1)
+      .get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          document.getElementById("accessStatus").innerHTML = "<span class='text-danger'>No record found.</span>";
+          document.getElementById("goMainBtn").disabled = true;
+          return;
+        }
+
+        const data = snapshot.docs[0].data();
+        const now = Date.now();
+
+        if (data.verified && data.expiry && now < data.expiry) {
+          document.getElementById("accessStatus").innerHTML = `<span class='text-success'>Access granted until: ${new Date(data.expiry).toLocaleString()}</span>`;
+          document.getElementById("goMainBtn").disabled = false;
+
+          // Store verified email in localStorage
+          localStorage.setItem("subscribedEmail", email);
+
+          // Enable redirection to main.html
+          document.getElementById("goMainBtn").onclick = () => {
+            window.location.href = "main.html";
+          };
+        } else if (data.verified && now > data.expiry) {
+          document.getElementById("accessStatus").innerHTML = "<span class='text-warning'>Your access has expired.</span>";
+          document.getElementById("goMainBtn").disabled = true;
+        } else {
+          document.getElementById("accessStatus").innerHTML = "<span class='text-warning'>Pending admin verification.</span>";
+          document.getElementById("goMainBtn").disabled = true;
+        }
+      });
+  }
+</script>
+
+</body>
+</html>
