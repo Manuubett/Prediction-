@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Completed Predictions</title>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      background-color: #f8fafc;
+    }
+    .container {
+      max-width: 900px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+    }
+    .card {
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+    .timestamp {
+      font-size: 0.85rem;
+      color: #6c757d;
+      font-style: italic;
+    }
+    .top-message {
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 10px;
+      padding: 15px 25px;
+      margin-bottom: 30px;
+      color: #0d47a1;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(14, 110, 230, 0.1);
+    }
+    .back-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-message">
+      Welcome! Browse all completed football predictions here — only results
+      marked as correct or wrong are shown. Stay informed and bet smart!
+    </div>
+    <h3 class="mb-4 text-center">Completed Predictions (Newest First)</h3>
+    <div id="oldPredictions" class="row g-3"></div>
+  </div>
+
+  <!-- Back to Main Button -->
+  <a href="subscribe.html" class="btn btn-primary back-button">Back to Main</a>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
+      authDomain: "prediction-94bf9.firebaseapp.com",
+      projectId: "prediction-94bf9",
+      storageBucket: "prediction-94bf9.appspot.com",
+      messagingSenderId: "960123689722",
+      appId: "1:960123689722:web:c707337a7b6972a3478743",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const oldPredictionsEl = document.getElementById("oldPredictions");
+
+    db.collection("predictions")
+      .orderBy("timestamp", "desc")
+      .get()
+      .then((snapshot) => {
+        const filtered = snapshot.docs
+          .map((doc) => doc.data())
+          .filter(
+            (p) =>
+              p.result &&
+              (p.result.toLowerCase() === "correct" ||
+                p.result.toLowerCase() === "wrong")
+          );
+
+        if (filtered.length === 0) {
+          oldPredictionsEl.innerHTML = `<div class="alert alert-warning text-center">No completed predictions available.</div>`;
+        } else {
+          filtered.forEach((p) => {
+            const timestamp = p.timestamp?.toDate?.() || new Date();
+            const timeStr = timestamp.toLocaleString();
+
+            const card = document.createElement("div");
+            card.className = "col-md-6";
+            card.innerHTML = `
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">${p.home} vs ${p.away}</h5>
+                  <p class="card-text">
+                    <strong>Time:</strong> ${p.time}<br />
+                    <strong>Prediction:</strong> ${p.prediction}<br />
+                    <strong>Result:</strong> <span class="${
+                      p.result === "correct" ? 'text-success' : 'text-danger'
+                    }">${p.result === "correct" ? "✔️ Correct" : "✖️ Wrong"}</span>
+                  </p>
+                  <div class="timestamp">Posted: ${timeStr}</div>
+                </div>
+              </div>
+            `;
+            oldPredictionsEl.appendChild(card);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error loading predictions:", error);
+        oldPredictionsEl.innerHTML = `<div class="alert alert-danger text-center">Failed to load predictions.</div>`;
+      });
+  </script>
+</body>
+</html>
