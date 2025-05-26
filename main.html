@@ -83,7 +83,7 @@
           countdownEl.innerHTML = "Access expired.";
           statusMsg.innerHTML = "<span class='text-danger'>Redirecting to subscribe...</span>";
           localStorage.removeItem("subscribedEmail");
-          setTimeout(() => window.location.href = "subscribe.html", 3000);
+          setTimeout(() => window.location.href = "index.html", 3000);
         } else {
           countdownEl.innerText = `Access ends in: ${formatCountdown(remaining)}`;
         }
