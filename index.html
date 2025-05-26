@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Subscribe with M-PESA</title>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -28,7 +27,6 @@
   </style>
 </head>
 <body>
-
 <div class="container py-5">
   <div class="text-center mb-4">
     <h2 class="fw-bold">Subscribe with M-PESA</h2>
@@ -110,6 +108,11 @@
       document.getElementById("submitStatus").textContent = "Message submitted. Please wait for admin approval.";
       document.getElementById("email").value = "";
       document.getElementById("message").value = "";
+
+      // Format and open WhatsApp
+      const formattedMessage = `New M-PESA Submission:\nEmail: ${email}\nMessage: ${message}`;
+      const encoded = encodeURIComponent(formattedMessage);
+      window.open(`https://wa.me/254704518130?text=${encoded}`, "_blank");
     }).catch(error => {
       console.error("Error submitting message: ", error);
       alert("Something went wrong. Try again.");
@@ -156,6 +159,5 @@
       });
   }
 </script>
-
 </body>
-</html>
+        </html>
