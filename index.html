@@ -3,25 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Subscribe for Fast ODI Predictions | Instant Tips Kenya</title>
-  <meta name="description" content="Unlock exclusive and accurate ODI predictions instantly. Subscribe for as low as Ksh 10. Secure and fast access to cricket insights in Kenya.">
-  <meta name="keywords" content="ODI predictions, tips, subscribe with M-PESA, cricket predictions Kenya, Kenya betting tips, fast predictions, mobile payment subscription, buy goods till number 4585402, pay with M-PESA, betting insights Kenya">
-  <meta name="author" content="Bett Emmanuel">
-  <meta name="robots" content="index, follow">
-  <meta property="og:title" content="Get Instant ODI Predictions 💯📌">
-  <meta property="og:description" content="Subscribe and access  tips instantly. Choose a plan, pay via till number 4585402, and unlock predictions.">
-  <meta property="og:image" content="https://i.ibb.co/s9FhqwST/download.png">
-  <meta property="og:url" content="https://yourdomain.com"> <!-- Replace with your actual domain -->
-  <meta property="og:type" content="website">
+  <title>Subscribe with M-PESA</title>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Your existing styles go here -->
-
+  <!-- Bootstrap JS Bundle (Required for modal to work) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     body {
       background: #f8f9fa;
@@ -107,7 +96,8 @@
     <button class="btn btn-warning w-100 mb-4" data-bs-toggle="modal" data-bs-target="#howToModal">
   How to Pay & Access
 </button>
- <!-- Submission Form -->
+
+    <!-- Submission Form -->
     <div class="card shadow-sm subscription-card mb-4">
       <div class="card-header bg-primary text-white fw-semibold">Submit Payment Message</div>
       <div class="card-body">
@@ -134,85 +124,104 @@
     <p class="text-center mt-4 footer-note">Thank you for your support – enjoy your prediction access!</p>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
-      authDomain: "prediction-94bf9.firebaseapp.com",
-      projectId: "prediction-94bf9",
-      storageBucket: "prediction-94bf9.appspot.com",
-      messagingSenderId: "960123689722",
-      appId: "1:960123689722:web:c707337a7b6972a3478743"
-    };
+<!-- Update only this script section -->
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
+    authDomain: "prediction-94bf9.firebaseapp.com",
+    projectId: "prediction-94bf9",
+    storageBucket: "prediction-94bf9.appspot.com",
+    messagingSenderId: "960123689722",
+    appId: "1:960123689722:web:c707337a7b6972a3478743"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-    function submitMessage() {
-      const email = document.getElementById("email").value.trim();
-      const message = document.getElementById("message").value.trim();
+  function submitMessage() {
+    const email = document.getElementById("email").value.trim();
+    const message = document.getElementById("message").value.trim();
 
-      if (!email || !message) {
-        alert("Please fill out both fields.");
-        return;
-      }
-
-      // Immediately open WhatsApp (to prevent popup block)
-      const whatsappText = `New M-PESA Submission:%0AEmail: ${email}%0AMessage: ${message}`;
-      const whatsappURL = `https://wa.me/254704518130?text=${whatsappText}`;
-      window.open(whatsappURL, '_blank');
-
-      // Send data to Firebase
-      db.collection("verifications").add({
-        email: email,
-        message: message,
-        verified: false,
-        submittedAt: Date.now()
-      }).then(() => {
-        document.getElementById("submitStatus").textContent = "Message submitted. Please wait for admin approval.";
-        document.getElementById("email").value = "";
-        document.getElementById("message").value = "";
-      }).catch(error => {
-        console.error("Error submitting message: ", error);
-        alert("Something went wrong. Try again.");
-      });
+    if (!email || !message) {
+      alert("Please fill out both fields.");
+      return;
     }
 
-    function checkStatus() {
-      const email = prompt("Enter your email to check status:").trim();
-      if (!email) return;
+    // Check if M-PESA message matches expected pattern
+    const mpesaPattern = /^[A-Z0-9]{10}\s+Confirmed/i;
+    if (!mpesaPattern.test(message)) {
+      alert("Invalid M-PESA message. Please copy the full original message from your phone.");
+      return;
+    }
 
-      db.collection("verifications")
-        .where("email", "==", email)
-        .orderBy("submittedAt", "desc")
-        .limit(1)
-        .get()
-        .then(snapshot => {
-          if (snapshot.empty) {
-            document.getElementById("accessStatus").innerHTML = "<span class='text-danger'>No record found.</span>";
-            document.getElementById("goMainBtn").disabled = true;
-            return;
-          }
+    // Check if same message already exists
+    db.collection("verifications")
+      .where("message", "==", message)
+      .get()
+      .then(snapshot => {
+        if (!snapshot.empty) {
+          alert("This M-PESA message has already been used.");
+          return;
+        }
 
-          const data = snapshot.docs[0].data();
-          const now = Date.now();
+        // Open WhatsApp before saving
+        const whatsappText = `New M-PESA Submission:%0AEmail: ${email}%0AMessage: ${message}`;
+        const whatsappURL = `https://wa.me/254704518130?text=${whatsappText}`;
+        window.open(whatsappURL, '_blank');
 
-          if (data.verified && data.expiry && now < data.expiry) {
-            document.getElementById("accessStatus").innerHTML = `<span class='text-success'>Access granted until: ${new Date(data.expiry).toLocaleString()}</span>`;
-            document.getElementById("goMainBtn").disabled = false;
-            localStorage.setItem("subscribedEmail", email);
-            document.getElementById("goMainBtn").onclick = () => {
-              window.location.href = "main.html";
-            };
-          } else if (data.verified && now > data.expiry) {
-            document.getElementById("accessStatus").innerHTML = "<span class='text-warning'>Your access has expired.</span>";
-            document.getElementById("goMainBtn").disabled = true;
-          } else {
-            document.getElementById("accessStatus").innerHTML = "<span class='text-warning'>Pending admin verification.</span>";
-            document.getElementById("goMainBtn").disabled = true;
-          }
+        // Store in Firestore
+        db.collection("verifications").add({
+          email: email,
+          message: message,
+          verified: false,
+          submittedAt: Date.now()
+        }).then(() => {
+          document.getElementById("submitStatus").textContent = "Message submitted. Please wait for admin approval.";
+          document.getElementById("email").value = "";
+          document.getElementById("message").value = "";
+        }).catch(error => {
+          console.error("Error submitting message: ", error);
+          alert("Something went wrong. Try again.");
         });
-    }
-  </script>
+      });
+  }
+
+  function checkStatus() {
+    const email = prompt("Enter your email to check status:")?.trim();
+    if (!email) return;
+
+    db.collection("verifications")
+      .where("email", "==", email)
+      .orderBy("submittedAt", "desc")
+      .limit(1)
+      .get()
+      .then(snapshot => {
+        if (snapshot.empty) {
+          document.getElementById("accessStatus").innerHTML = "<span class='text-danger'>No record found.</span>";
+          document.getElementById("goMainBtn").disabled = true;
+          return;
+        }
+
+        const data = snapshot.docs[0].data();
+        const now = Date.now();
+
+        if (data.verified && data.expiry && now < data.expiry) {
+          document.getElementById("accessStatus").innerHTML = `<span class='text-success'>Access granted until: ${new Date(data.expiry).toLocaleString()}</span>`;
+          document.getElementById("goMainBtn").disabled = false;
+          localStorage.setItem("subscribedEmail", email);
+          document.getElementById("goMainBtn").onclick = () => {
+            window.location.href = "main.html";
+          };
+        } else if (data.verified && now > data.expiry) {
+          document.getElementById("accessStatus").innerHTML = "<span class='text-warning'>Your access has expired.</span>";
+          document.getElementById("goMainBtn").disabled = true;
+        } else {
+          document.getElementById("accessStatus").innerHTML = "<span class='text-warning'>Pending admin verification.</span>";
+          document.getElementById("goMainBtn").disabled = true;
+        }
+      });
+  }
+</script>
   <!-- How to Pay & Access Modal -->
 <div class="modal fade" id="howToModal" tabindex="-1" aria-labelledby="howToModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -241,4 +250,4 @@
   </div>
 </div>
 </body>
-    </html>
+                                                                                         </html>
