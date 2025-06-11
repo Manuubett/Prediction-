@@ -1,165 +1,181 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Match Setup Admin</title>
+
+
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <title>Admin Predictions</title>  
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" />  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background: #f4f4f4;
-    }
-    .form-group {
-      margin-bottom: 25px;
-      position: relative;
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    input[type="text"], input[type="time"] {
-      width: 300px;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    ul.suggestions {
-      position: absolute;
-      background: #fff;
-      border: 1px solid #ccc;
-      width: 300px;
-      list-style: none;
-      margin-top: 0;
-      padding-left: 0;
-      max-height: 150px;
-      overflow-y: auto;
-      z-index: 10;
-    }
-    ul.suggestions li {
-      padding: 8px 10px;
-      cursor: pointer;
-    }
-    ul.suggestions li:hover {
-      background-color: #eee;
-    }
-    .match-display {
-      margin-top: 20px;
-      padding: 15px;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 18px;
-      width: fit-content;
-    }
-    .match-display span {
-      font-weight: bold;
-    }
-    button {
-      padding: 10px 15px;
-      font-size: 16px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #218838;
-    }
-    #savedList {
-      margin-top: 30px;
-      background: #fff;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      width: fit-content;
-    }
-    #activeUsers {
-      background: #fff;
-      padding: 10px;
-      margin-top: 30px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-  </style>
-</head>
-<body>
+  #homeTeamSuggestions li,
+  #awayTeamSuggestions li {
+    font-size: 1.5rem;           /* Increases text size */
+    color: red;                /* Changes text color to green */
+    padding: 8px 12px;           /* Makes it more clickable */
+    cursor: pointer;
+  }
 
-  <button onclick="window.location.href='main.html'">View Public Predictions</button>
-  <h2>(Admin)</h2>
+  #homeTeamSuggestions li:hover,
+  #awayTeamSuggestions li:hover {
+    background-color: #e0ffe0;   /* Light green on hover */
+  }
 
-  <!-- Active Users Display -->
-  <div id="activeUsers">Loading active users...</div>
+  #homeTeamSuggestions,
+  #awayTeamSuggestions {
+    max-height: 200px;           /* Optional: scrollable if too long */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 4px;
+    margin-top: -10px;           /* Tighten spacing */
+  }
+  .form-group {
+  margin-bottom: 1.5rem;
+}
 
-  <!-- Message Section -->
-  <div class="form-group">
-    <label for="adminMessage">Admin Message</label>
-    <input type="text" id="adminMessage" placeholder="Type your message to users..." />
-    <button onclick="sendAdminMessage()">Send Message</button>
+.form-label {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.required {
+  font-weight: normal;
+  font-size: 0.9rem;
+  color: #e74c3c;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  background-color: #fdfdfd;
+  color: #333;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  outline: none;
+}
+
+.form-text {
+  display: block;
+  margin-top: 0.4rem;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+</style><button 
+  onclick="window.location.href='main.html'" 
+  style="
+    position: absolute; 
+    top: 80px; 
+    right: 20px; 
+    background-color: #007BFF; 
+    color: white; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 8px; 
+    font-size: 16px; 
+    cursor: pointer; 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease;"
+>
+  🌐 View Public Predictions
+</button>
+
+<!-- Optional hover effect via inline style with JS fallback -->
+<script>
+  const btn = document.querySelector("button");
+  btn.addEventListener("mouseover", () => btn.style.backgroundColor = "#0056b3");
+  btn.addEventListener("mouseout", () => btn.style.backgroundColor = "#007BFF");
+</script>
+
+</head>  
+<body class="bg-light p-4">  
+  <div class="container">  
+    <h1 class="mb-4">Prediction Admin Panel</h1>  <!-- Username input -->  
+<div class="form-group">
+  <label for="username" class="form-label">
+    Your Name <span class="required">(required)</span>
+  </label>  
+  <input 
+    type="text" 
+    id="username" 
+    class="form-control" 
+    placeholder="Enter your name" 
+    required 
+  />  
+  <small class="form-text">
+    You must enter your name before making or managing predictions.
+  </small>  
+</div>
+
+<!-- Prediction form -->  
+<div class="form-group">
+  <!-- Home Team with Autocomplete Suggestions -->
+  <div class="position-relative">
+    <input type="text" id="homeTeam" class="form-control mb-2" placeholder="Home Team" disabled />
+    <ul id="homeTeamSuggestions" class="list-group position-absolute w-100" style="z-index: 1000;"></ul>
   </div>
-<div id="adminMessages"></div>
-  <!-- Match Form -->
-  <div class="form-group">
-    <label for="homeTeam">Home Team</label>
-    <input type="text" id="homeTeam" placeholder="Start typing..." autocomplete="off" />
-    <ul id="homeSuggestions" class="suggestions"></ul>
+
+  <!-- Away Team with Autocomplete Suggestions -->
+  <div class="position-relative">
+    <input type="text" id="awayTeam" class="form-control mb-2" placeholder="Away Team" disabled />
+    <ul id="awayTeamSuggestions" class="list-group position-absolute w-100" style="z-index: 1000;"></ul>
   </div>
 
-  <div class="form-group">
-    <label for="awayTeam">Away Team</label>
-    <input type="text" id="awayTeam" placeholder="Start typing..." autocomplete="off" />
-    <ul id="awaySuggestions" class="suggestions"></ul>
-  </div>
+  <!-- Match Time -->
+<label for="matchTime" style="font-size: 14px; color: #666; display: block; margin-bottom: 4px;">
+  Match Time (auto-filled)
+</label>
+<input 
+  type="datetime-local" 
+  id="matchTime" 
+  class="form-control mb-2" 
+  disabled
+  style="background-color: #f0f0f0; color: #555; border: 1px solid #ccc; padding: 8px; font-size: 14px;" 
+/>
+  <!-- Prediction -->
+  <input type="text" id="prediction" class="form-control mb-2" placeholder="Prediction (e.g. 2-1, 1X, over 2.5)" disabled />
 
-  <div class="form-group">
-    <label for="matchTime">Match Time</label>
-    <input type="time" id="matchTime" />
-  </div>
+  <!-- Submit Button -->
+  <button id="postBtn" class="btn btn-primary mt-2" onclick="savePrediction()" disabled>Post Prediction</button>
+</div>
+<hr/>  
 
-  <div class="form-group">
-    <label for="prediction">Prediction</label>
-    <input type="text" id="prediction" placeholder="e.g. 2-1, Draw, Over 2.5, GG" />
-  </div>
+<!-- Prediction list -->  
+<h3 class="mt-4">Predictions</h3>  
+<div id="predictionsList"></div>
 
-  <div id="display" class="match-display"></div>
-
-  <button onclick="savePrediction()">Save Prediction</button>
-
-  <h3>Saved Predictions</h3>
-  <div id="savedList">Loading...</div>
+  </div>  
+<div id="adminPredictions"></div>  
+  <!-- Firebase & Firestore Setup -->  
 <script type="module">
-  import {
-    initializeApp
-  } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs,
-    deleteDoc,
-    doc,
-    query,
-    orderBy,
-    updateDoc,
-    setDoc,
-    where
-  } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, deleteDoc,
+  doc, query, orderBy, updateDoc, where, getDoc, setDoc
+} from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
-    authDomain: "prediction-94bf9.firebaseapp.com",
-    projectId: "prediction-94bf9",
-    storageBucket: "prediction-94bf9.appspot.com",
-    messagingSenderId: "960123689722",
-    appId: "1:960123689722:web:c707337a7b6972a3478743"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
+  authDomain: "prediction-94bf9.firebaseapp.com",
+  projectId: "prediction-94bf9",
+  storageBucket: "prediction-94bf9.appspot.com",
+  messagingSenderId: "960123689722",
+  appId: "1:960123689722:web:c707337a7b6972a3478743"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
   const teams = [
       "Torino", "Inter Milan", "Napoli", "Fiorentina", "Atalanta", "Sampdoria", "Lazio", "Roma",
       "Frosinone", "Sassuolo", "Bologna", "Verona", "Lecce", "AC Milan", "Udinese", "SPAL", "Genoa",
@@ -171,7 +187,7 @@
       "Osasuna", "Granada", "Almeria", "West Brom", "West Ham", "Fulham", "Burnley", "Leeds",
       "London Blues", "Brighton", "Liverpool", "Aston Villa", "Sheffield United", "London Reds",
       "Wolves", "Southampton", "Manchester Reds", "Leicester", "Manchester Blue", "Everton",
-      "Newcastle", "Tottenham", "Crystal Palace"
+      "Newcastle", "Tottenham", "Palace"
     ];
 
     function setupAutocomplete(inputId, suggestionId) {
@@ -203,174 +219,214 @@
       });
     }
 
-  function updateMatchDisplay() {
-    const home = document.getElementById('homeTeam').value.trim();
-    const away = document.getElementById('awayTeam').value.trim();
-    const time = document.getElementById('matchTime').value;
-    const prediction = document.getElementById('prediction').value.trim();
-    const display = document.getElementById('display');
-    if (home && away) {
-      display.innerHTML = `<span>${home}</span> vs <span>${away}</span>`;
-      if (time) display.innerHTML += `<br>Time: ${time}`;
-      if (prediction) display.innerHTML += `<br>Prediction: ${prediction}`;
-    } else {
-      display.innerHTML = '';
-    }
+let currentUser = "";
+
+// Handle username input and load predictions
+window.addEventListener("load", () => {
+  const usernameInput = document.getElementById("username");
+  const savedUsername = localStorage.getItem("username");
+
+  if (savedUsername) {
+    usernameInput.value = savedUsername;
+    currentUser = savedUsername;
+    enableInputs(true);
+    loadPredictions();
+    fetchPredictions();
   }
 
-  window.savePrediction = async function () {
-    const home = document.getElementById('homeTeam').value.trim();
-    const away = document.getElementById('awayTeam').value.trim();
-    const time = document.getElementById('matchTime').value;
-    const prediction = document.getElementById('prediction').value.trim();
-    if (home && away && time && prediction) {
-      await addDoc(collection(db, "predictions"), {
-        home,
-        away,
-        time,
-        prediction,
-        timestamp: Date.now()
-      });
-      alert("Prediction saved!");
+  usernameInput.addEventListener("input", () => {
+    currentUser = usernameInput.value.trim();
+    localStorage.setItem("username", currentUser);
+    enableInputs(!!currentUser);
+
+    if (currentUser) {
       loadPredictions();
+      fetchPredictions();
     } else {
-      alert("Please fill in all fields.");
+      document.getElementById("predictionsList").innerHTML = "";
+      document.getElementById("adminPredictions").innerHTML = "";
     }
-  };
-
-  window.sendAdminMessage = async function () {
-    const message = document.getElementById("adminMessage").value.trim();
-    if (!message) {
-      alert("Type a message first!");
-      return;
-    }
-    await addDoc(collection(db, "messages"), {
-      message,
-      timestamp: Date.now()
-    });
-    document.getElementById("adminMessage").value = "";
-    alert("Message sent to public page!");
-    loadAdminMessages();
-  };
-
-  async function getLikeCount(predictionId) {
-    const q = query(collection(db, "prediction_likes"), where("predictionId", "==", predictionId));
-    const snapshot = await getDocs(q);
-    return snapshot.size;
-  }
-
-  window.loadPredictions = async function () {
-    const list = document.getElementById("savedList");
-    list.innerHTML = "Loading...";
-
-    const q = query(collection(db, "predictions"), orderBy("timestamp", "desc"));
-    const snapshot = await getDocs(q);
-    list.innerHTML = "";
-
-    for (const docSnap of snapshot.docs) {
-      const data = docSnap.data();
-      const predictionId = docSnap.id;
-      const likeCount = await getLikeCount(predictionId);
-
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <strong>${data.home} vs ${data.away}</strong><br>
-        Time: <span style="color:blue">${data.time}</span><br>
-        Prediction: <span style="color:green">${data.prediction}</span><br>
-        <span>Result: ${data.result === "correct" ? "✔️" : data.result === "wrong" ? "✖️" : "Pending"}</span><br>
-        <span style="color:gray">Likes: ${likeCount}</span><br>
-        <button onclick="markResult('${predictionId}', 'correct')">✔️</button>
-        <button onclick="markResult('${predictionId}', 'wrong')">✖️</button>
-        <button onclick="deletePrediction('${predictionId}')">Delete</button>
-        <hr>`;
-      list.appendChild(div);
-    }
-  };
-
-  window.deletePrediction = async function (id) {
-    await deleteDoc(doc(db, "predictions", id));
-    alert("Deleted!");
-    loadPredictions();
-  };
-
-  window.markResult = async function (id, result) {
-    await updateDoc(doc(db, "predictions", id), { result });
-    alert("Result updated!");
-    loadPredictions();
-  };
-
-  async function loadActiveUsers() {
-    const container = document.getElementById("activeUsers");
-    container.innerHTML = "Checking active users...";
-    const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
-    const q = query(collection(db, "visitors"), where("lastSeen", ">", tenMinutesAgo));
-    const snapshot = await getDocs(q);
-    let html = `<strong>Active Users:</strong><br>`;
-    let i = 1;
-    snapshot.forEach(() => html += `User #${i++}<br>`);
-    container.innerHTML = html || "No active users";
-  }
-
-  async function getMessageLoveCount(messageId) {
-    const q = query(collection(db, "message_impressions"), where("messageId", "==", messageId));
-    const snapshot = await getDocs(q);
-    return snapshot.size;
-  }
-
-  window.loadAdminMessages = async function () {
-    const container = document.getElementById("adminMessages");
-    container.innerHTML = "Loading admin messages...";
-
-    const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
-    const snapshot = await getDocs(q);
-    container.innerHTML = "";
-
-    if (snapshot.empty) {
-      container.innerHTML = "<div class='alert alert-warning'>No admin messages yet.</div>";
-      return;
-    }
-
-    for (const docSnap of snapshot.docs) {
-      const data = docSnap.data();
-      const messageId = docSnap.id;
-      const loveCount = await getMessageLoveCount(messageId);
-
-      const div = document.createElement("div");
-      div.className = "alert alert-info border p-2 mb-2 shadow-sm";
-      div.innerHTML = `
-        <p><strong>📢 Message:</strong> ${data.message}</p>
-        <p>❤️ Loved by <strong>${loveCount}</strong> user(s)</p>
-        <button class="btn btn-sm btn-danger" onclick="deleteAdminMessage('${messageId}')">🗑️ Delete</button>
-      `;
-      container.appendChild(div);
-    }
-  };
-
-  window.deleteAdminMessage = async function (messageId) {
-    if (confirm("Are you sure you want to delete this message?")) {
-      await deleteDoc(doc(db, "messages", messageId));
-      alert("Message deleted.");
-      loadAdminMessages();
-    }
-  };
-
-  function formatDate(ts) {
-    const d = new Date(ts);
-    return d.toLocaleString();
-  }
-
-  setupAutocomplete('homeTeam', 'homeSuggestions');
-  setupAutocomplete('awayTeam', 'awaySuggestions');
-  document.getElementById('matchTime').addEventListener('input', updateMatchDisplay);
-  document.getElementById('prediction').addEventListener('input', updateMatchDisplay);
-
-  window.addEventListener("DOMContentLoaded", () => {
-    loadPredictions();
-    loadActiveUsers();
-    loadAdminMessages(); // ✅ Now called on page load
-    setInterval(loadActiveUsers, 60000);
   });
-</script>
-  <!-- Firebase Scripts -->
-</body>
-      </html>
+});
+
+function enableInputs(enabled) {
+  document.getElementById("homeTeam").disabled = !enabled;
+  document.getElementById("awayTeam").disabled = !enabled;
+  document.getElementById("matchTime").disabled = !enabled;
+  document.getElementById("prediction").disabled = !enabled;
+  document.getElementById("postBtn").disabled = !enabled;
+}
+
+// Save prediction
+window.savePrediction = async function () {
+  const home = document.getElementById('homeTeam').value.trim();
+  const away = document.getElementById('awayTeam').value.trim();
+  const time = document.getElementById('matchTime').value;
+  const prediction = document.getElementById('prediction').value.trim();
+
+  if (!currentUser || !home || !away || !time || !prediction) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  await addDoc(collection(db, "predictions"), {
+    username: currentUser,
+    home,
+    away,
+    time,
+    prediction,
+    timestamp: Date.now()
+  });
+
+  document.getElementById("homeTeam").value = "";
+  document.getElementById("awayTeam").value = "";
+  document.getElementById("matchTime").value = "";
+  document.getElementById("prediction").value = "";
+
+  alert("Prediction saved!");
+  loadPredictions();
+  fetchPredictions();
+};
+
+// Load current user's predictions
+async function loadPredictions() {
+  const list = document.getElementById("predictionsList");
+  list.innerHTML = "";
+
+  if (!currentUser) return;
+
+  const q = query(collection(db, "predictions"), where("username", "==", currentUser), orderBy("timestamp", "desc"));
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((docSnap) => {
+    const data = docSnap.data();
+    const predictionId = docSnap.id;
+
+    const div = document.createElement("div");
+    div.className = "card my-2";
+    div.innerHTML = `
+      <div class="card-body">
+        <h5 class="card-title">${data.home} vs ${data.away}</h5>
+        <p class="card-text"><strong>Prediction:</strong> ${data.prediction}</p>
+        <p class="card-text"><strong>Time:</strong> ${new Date(data.time).toLocaleString()}</p>
+        <p class="card-text"><strong>Status:</strong> ${data.result || "Pending"}</p>
+      </div>
+      <div class="card-footer">
+        ${data.result
+          ? `<small class="text-muted">Result already marked as <strong>${data.result}</strong></small>`
+          : `
+            <button class="btn btn-success btn-sm me-2" onclick="markResult('${predictionId}', 'correct')">✔️ Mark Correct</button>
+            <button class="btn btn-danger btn-sm me-2" onclick="markResult('${predictionId}', 'wrong')">✖️ Mark Wrong</button>
+          `
+        }
+       
+    `;
+    list.appendChild(div);
+  });
+}
+
+// Fetch and display all predictions with likes
+async function fetchPredictions() {
+  const predictionSnapshot = await getDocs(collection(db, "predictions"));
+  const predictions = predictionSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  const likesSnapshot = await getDocs(collection(db, "prediction_likes"));
+  const likeCounts = {};
+
+  likesSnapshot.forEach(doc => {
+    const { predictionId } = doc.data();
+    if (!likeCounts[predictionId]) likeCounts[predictionId] = 0;
+    likeCounts[predictionId]++;
+  });
+
+  const container = document.getElementById("adminPredictions");
+  container.innerHTML = "";
+
+  predictions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  predictions.forEach(pred => {
+    const likes = likeCounts[pred.id] || 0;
+    const result = pred.result === "correct" ? "✔️" : pred.result === "wrong" ? "✖️" : "Pending";
+
+    const actions = pred.username === currentUser
+      ? `
+        ${pred.result
+          ? `<small class="text-muted">Result already marked as <strong>${pred.result}</strong></small>`
+          : `
+            <button class="btn btn-success btn-sm me-1" onclick="markResult('${pred.id}', 'correct')">✔️ Mark Correct</button>
+            <button class="btn btn-danger btn-sm me-1" onclick="markResult('${pred.id}', 'wrong')">✖️ Mark Wrong</button>
+          `
+        }
+      
+      `
+      : `<small class="text-muted">By: ${pred.username}</small>`;
+
+    const div = document.createElement("div");
+    div.className = "card my-2";
+    div.innerHTML = `
+      <div class="card-body">
+        <strong>${pred.home} vs ${pred.away}</strong><br>
+        🕒 ${new Date(pred.time).toLocaleString()}<br>
+        ✅ Prediction: ${pred.prediction}<br>
+        👤 By: ${pred.username}<br>
+        ❤️ Likes: <strong>${likes}</strong><br>
+        <strong>Status:</strong> ${result}<br>
+        <div class="mt-2">${actions}</div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Delete prediction (with archiving)
+window.deletePrediction = async function (id) {
+  const ref = doc(db, "predictions", id);
+  const docSnap = await getDoc(ref);
+
+  if (!docSnap.exists()) {
+    alert("Prediction not found.");
+    return;
+  }
+
+  const data = docSnap.data();
+
+  if (data.username !== currentUser) {
+    alert("You can only delete your own predictions.");
+    return;
+  }
+
+  await setDoc(doc(db, "deleted_predictions", id), {
+    ...data,
+    deletedAt: Date.now()
+  });
+
+  await deleteDoc(ref);
+  alert("Prediction archived and deleted!");
+  loadPredictions();
+  fetchPredictions();
+};
+
+// Mark prediction result
+window.markResult = async function (id, result) {
+  const docSnap = await getDoc(doc(db, "predictions", id));
+  const data = docSnap.data();
+
+  if (data.result) {
+    alert(`This prediction has already been marked as "${data.result}".`);
+    return;
+  }
+
+  if (data.username !== currentUser) {
+    alert("You can only update your own predictions.");
+    return;
+  }
+
+  await updateDoc(doc(db, "predictions", id), { result });
+  alert("Result updated!");
+  loadPredictions();
+  fetchPredictions();
+};
+setupAutocomplete("homeTeam", "homeTeamSuggestions");
+setupAutocomplete("awayTeam", "awayTeamSuggestions");
+</script> </body>  
+  </html>
