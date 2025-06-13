@@ -184,7 +184,7 @@
         name: userName,
         userAgent: navigator.userAgent,
         lastActiveAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      }, { merge: true });
     }
 
     async function saveUserName() {
@@ -198,7 +198,7 @@
         userAgent: navigator.userAgent,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         lastActiveAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      }, { merge: true });
 
       const modal = bootstrap.Modal.getInstance(document.getElementById('nameModal'));
       modal.hide();
@@ -296,37 +296,37 @@
       }
     }
 
-    async function checkUserStatus() {
+    function watchUserStatusRealtime() {
       const userId = getUserId();
-      const userRef = db.collection("active_users").doc(userId);
-      const doc = await userRef.get();
       const contentWrapper = document.getElementById("content-wrapper");
       const messageContainer = document.getElementById("adminMessageAlert");
 
-      if (!doc.exists) return;
+      db.collection("active_users").doc(userId).onSnapshot(doc => {
+        if (!doc.exists) return;
 
-      const data = doc.data();
-      const isEnabled = data?.isEnabled ?? true;
-      const message = data?.message || "Access to the content is currently disabled by admin.";
+        const data = doc.data();
+        const isEnabled = data?.isEnabled ?? true;
+        const message = data?.message || "Access to the content is currently disabled by admin.";
 
-      if (!isEnabled) {
-        localStorage.setItem("adminMessage", message);
-        localStorage.setItem("adminMessageEnabled", "false");
-        contentWrapper.classList.add("disabled");
-        messageContainer.classList.add("show");
-        messageContainer.innerHTML = `
-          <div class="admin-message-box">
-            <strong>Admin Message:</strong><br>
-            ${message}
-          </div>
-        `;
-      } else {
-        localStorage.removeItem("adminMessage");
-        localStorage.setItem("adminMessageEnabled", "true");
-        contentWrapper.classList.remove("disabled");
-        messageContainer.classList.remove("show");
-        messageContainer.innerHTML = "";
-      }
+        if (!isEnabled) {
+          localStorage.setItem("adminMessage", message);
+          localStorage.setItem("adminMessageEnabled", "false");
+          contentWrapper.classList.add("disabled");
+          messageContainer.classList.add("show");
+          messageContainer.innerHTML = `
+            <div class="admin-message-box">
+              <strong>Admin Message:</strong><br>
+              ${message}
+            </div>
+          `;
+        } else {
+          localStorage.removeItem("adminMessage");
+          localStorage.removeItem("adminMessageEnabled");
+          contentWrapper.classList.remove("disabled");
+          messageContainer.classList.remove("show");
+          messageContainer.innerHTML = "";
+        }
+      });
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -336,12 +336,12 @@
       }
 
       loadCachedAdminMessage();
-      await checkUserStatus();
       promptUserName();
       loadPredictions();
+      watchUserStatusRealtime();
       setActiveUserPing();
       setInterval(setActiveUserPing, 30000);
     });
   </script>
 </body>
-        </html>
+  </html>
