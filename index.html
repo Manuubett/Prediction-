@@ -73,21 +73,41 @@
       opacity: 0.6;
     }
 
+    #adminMessageAlert {
+      display: none;
+    }
+
+    #adminMessageAlert.show {
+      display: block;
+    }
+
     .admin-message {
       position: fixed;
       top: 80px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 2000;
-      max-width: 600px;
+      max-width: 800px;
       width: 90%;
+    }
+
+    .admin-message-box {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 2rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #856404;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
 
   <!-- Top Right Button -->
-  <button id="public-button" onclick="window.location.href='bett.html'">🌐</button>
+  <button id="public-button" onclick="window.location.href='main.html'">🌐</button>
 
   <!-- Admin Message -->
   <div id="adminMessageAlert" class="admin-message"></div>
@@ -198,39 +218,40 @@
     }
 
     function loadPredictions() {
-  const predictionsEl = document.getElementById("predictions");
+      const predictionsEl = document.getElementById("predictions");
 
-  db.collection("predictions").orderBy("timestamp", "desc")
-    .onSnapshot(async (snapshot) => {
-      predictionsEl.innerHTML = ""; // Clear before re-render
+      db.collection("predictions").orderBy("timestamp", "desc")
+        .onSnapshot(async (snapshot) => {
+          predictionsEl.innerHTML = "";
 
-      for (const doc of snapshot.docs) {
-        const p = doc.data();
-        const predictionId = doc.id;
-        const likeCount = await getLikeCount(predictionId);
+          for (const doc of snapshot.docs) {
+            const p = doc.data();
+            const predictionId = doc.id;
+            const likeCount = await getLikeCount(predictionId);
 
-        const card = document.createElement("div");
-        card.className = "col-md-6 col-lg-4";
-        card.innerHTML = `
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title text-dark">${p.home} vs ${p.away}</h5>
-              <p class="card-text mb-1"><strong>Time:</strong> ${p.time}</p>
-              <p class="card-text mb-1"><strong>Prediction:</strong> ${p.prediction}</p>
-              <p class="card-text mb-2"><strong>Result:</strong> ${
-                p.result === "correct" ? "✔️ Correct" :
-                p.result === "wrong" ? "✖️ Wrong" : "⏳ Pending"
-              }</p>
-              <button class="btn btn-sm btn-outline-primary" onclick="likePrediction('${predictionId}')">
-                👍 Like (<span id="like-count-${predictionId}">${likeCount}</span>)
-              </button>
-            </div>
-          </div>
-        `;
-        predictionsEl.appendChild(card);
-      }
-    });
-}
+            const card = document.createElement("div");
+            card.className = "col-md-6 col-lg-4";
+            card.innerHTML = `
+              <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title text-dark">${p.home} vs ${p.away}</h5>
+                  <p class="card-text mb-1"><strong>Time:</strong> ${p.time}</p>
+                  <p class="card-text mb-1"><strong>Prediction:</strong> ${p.prediction}</p>
+                  <p class="card-text mb-2"><strong>Result:</strong> ${
+                    p.result === "correct" ? "✔️ Correct" :
+                    p.result === "wrong" ? "✖️ Wrong" : "⏳ Pending"
+                  }</p>
+                  <button class="btn btn-sm btn-outline-primary" onclick="likePrediction('${predictionId}')">
+                    👍 Like (<span id="like-count-${predictionId}">${likeCount}</span>)
+                  </button>
+                </div>
+              </div>
+            `;
+            predictionsEl.appendChild(card);
+          }
+        });
+    }
+
     async function getLikeCount(predictionId) {
       const q = db.collection("prediction_likes").where("predictionId", "==", predictionId);
       const snapshot = await q.get();
@@ -257,6 +278,27 @@
       }
     }
 
+    function loadCachedStatus() {
+      try {
+        const cached = JSON.parse(localStorage.getItem("userStatus"));
+        const contentWrapper = document.getElementById("content-wrapper");
+        const messageContainer = document.getElementById("adminMessageAlert");
+
+        if (cached && cached.isEnabled === false) {
+          contentWrapper.classList.add("disabled");
+          messageContainer.classList.add("show");
+          messageContainer.innerHTML = `
+            <div class="admin-message-box">
+              <strong>Admin Message:</strong><br>
+              ${cached.message}
+            </div>
+          `;
+        }
+      } catch (e) {
+        console.error("Error reading cached status:", e);
+      }
+    }
+
     async function checkUserStatus() {
       const userId = getUserId();
       const userRef = db.collection("active_users").doc(userId);
@@ -268,20 +310,22 @@
 
       const data = doc.data();
       const isEnabled = data?.isEnabled ?? true;
-      const message = data?.message;
+      const message = data?.message || "Access to the content is currently disabled by admin.";
+
+      localStorage.setItem("userStatus", JSON.stringify({ isEnabled, message }));
 
       if (!isEnabled) {
         contentWrapper.classList.add("disabled");
-        if (message) {
-          messageContainer.innerHTML = `
-            <div class="alert alert-warning alert-dismissible fade show shadow" role="alert">
-              <strong>Admin Message:</strong> ${message}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          `;
-        }
+        messageContainer.classList.add("show");
+        messageContainer.innerHTML = `
+          <div class="admin-message-box">
+            <strong>Admin Message:</strong><br>
+            ${message}
+          </div>
+        `;
       } else {
         contentWrapper.classList.remove("disabled");
+        messageContainer.classList.remove("show");
         messageContainer.innerHTML = "";
       }
     }
@@ -292,6 +336,7 @@
         matchTimeField.value = new Date().toISOString().slice(0, 16);
       }
 
+      loadCachedStatus();
       await checkUserStatus();
       promptUserName();
       loadPredictions();
@@ -300,4 +345,4 @@
     });
   </script>
 </body>
-</html>
+          </html>
