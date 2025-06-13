@@ -154,7 +154,7 @@
     </div>
   </div>
 
-  <!-- Firebase Logic -->
+  <!-- Firebase and App Logic -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBTmeDxIUhua52KDAoag23q9MuNEOQXYQg",
@@ -278,24 +278,21 @@
       }
     }
 
-    function loadCachedStatus() {
-      try {
-        const cached = JSON.parse(localStorage.getItem("userStatus"));
-        const contentWrapper = document.getElementById("content-wrapper");
-        const messageContainer = document.getElementById("adminMessageAlert");
+    function loadCachedAdminMessage() {
+      const savedMessage = localStorage.getItem("adminMessage");
+      const enabledFlag = localStorage.getItem("adminMessageEnabled");
+      const contentWrapper = document.getElementById("content-wrapper");
+      const messageContainer = document.getElementById("adminMessageAlert");
 
-        if (cached && cached.isEnabled === false) {
-          contentWrapper.classList.add("disabled");
-          messageContainer.classList.add("show");
-          messageContainer.innerHTML = `
-            <div class="admin-message-box">
-              <strong>Admin Message:</strong><br>
-              ${cached.message}
-            </div>
-          `;
-        }
-      } catch (e) {
-        console.error("Error reading cached status:", e);
+      if (enabledFlag === "false" && savedMessage) {
+        contentWrapper.classList.add("disabled");
+        messageContainer.classList.add("show");
+        messageContainer.innerHTML = `
+          <div class="admin-message-box">
+            <strong>Admin Message:</strong><br>
+            ${savedMessage}
+          </div>
+        `;
       }
     }
 
@@ -312,9 +309,9 @@
       const isEnabled = data?.isEnabled ?? true;
       const message = data?.message || "Access to the content is currently disabled by admin.";
 
-      localStorage.setItem("userStatus", JSON.stringify({ isEnabled, message }));
-
       if (!isEnabled) {
+        localStorage.setItem("adminMessage", message);
+        localStorage.setItem("adminMessageEnabled", "false");
         contentWrapper.classList.add("disabled");
         messageContainer.classList.add("show");
         messageContainer.innerHTML = `
@@ -324,6 +321,8 @@
           </div>
         `;
       } else {
+        localStorage.removeItem("adminMessage");
+        localStorage.setItem("adminMessageEnabled", "true");
         contentWrapper.classList.remove("disabled");
         messageContainer.classList.remove("show");
         messageContainer.innerHTML = "";
@@ -336,7 +335,7 @@
         matchTimeField.value = new Date().toISOString().slice(0, 16);
       }
 
-      loadCachedStatus();
+      loadCachedAdminMessage();
       await checkUserStatus();
       promptUserName();
       loadPredictions();
@@ -345,4 +344,4 @@
     });
   </script>
 </body>
-          </html>
+        </html>
