@@ -72,6 +72,11 @@
   color: #6c757d;
   font-size: 0.875rem;
 }
+    #content-wrapper.disabled {
+      filter: blur(4px);
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.6;
 </style><button 
   onclick="window.location.href='index.html'" 
   style="
@@ -90,6 +95,16 @@
 >
   🌐 View Public 
 </button>
+  <div id="content-wrapper">
+    <div class="container text-center py-5 logo-section">
+      <a href="https://odibets.com/league" target="_blank">
+        <img src="https://i.ibb.co/s9FhqwST/download.png" alt="OdiBets Logo" />
+      </a>
+      <p class="mt-2">
+        <a href="https://odibets.com/league" target="_blank">Click here to visit the Odi League page</a>
+      </p>
+    </div>
+    
 
 <!-- Optional hover effect via inline style with JS fallback -->
 <script>
